@@ -38,3 +38,35 @@ app.listen(port, () => {
     console.log( `SERVIDOR: http://localhost:${port}`);
 });  
 
+
+// ejersicios:
+
+//1)
+
+app.get("/saludo/:nombre", (req, res) => {
+    const nombre = req.params.nombre;
+
+    if (nombre.length < 3) {
+        return res.status(400).send("Error: El nombre debe tener al menos 3 letras.");
+    }
+
+    res.send(`Hola, ${nombre}, bienvenido.`);
+});
+
+//2)
+app.get("/productos/:nombre", (req, res) => {
+    const nombre = req.params.nombre;
+    res.send(`Producto: ${nombre}`);
+
+    res.json({ "id": 1, "nombre": nombre, "cantidad_stok": 10, "precio": 1000, "categoria": "electronica" });
+});
+
+//3)
+
+app.get("/productos/:categoria/:id", (req, res) => {
+    const categoria = req.params.categoria;
+    const id = req.params.id;
+    res.json({ "producto": id, "categoria": categoria, "servidor": "http://localhost:3030" }); 
+});
+
+
