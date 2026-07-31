@@ -1,0 +1,7 @@
+INICIAR SERVIDOR, CORRER APLICACION:
+
+node app.js
+
+PARA INSTALAR:
+npm install nombre_dependencia
+npm install
