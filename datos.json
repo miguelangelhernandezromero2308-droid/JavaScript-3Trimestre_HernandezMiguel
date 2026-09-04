@@ -13,5 +13,12 @@
     "correo": "miguel@example.com",
     "imagen": "/imagenes/mifoto.png",
     "clave": "123456"
+  },
+  {
+    "id": "3",
+    "nombre": "miguel",
+    "correo": "miguel@gmail.com",
+    "clave": "153647",
+    "imagen": "/misImagenes/1788550843111.png"
   }
 ]
