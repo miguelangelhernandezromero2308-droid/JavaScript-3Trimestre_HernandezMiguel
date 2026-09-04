@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "nombre": "miguel",
+    "correo": "miguel@example.com",
+    "imagen": "/imagenes/mifoto.png",
+    "clave": "123456"
+  },
+  null,
+  {
+    "id": 1,
+    "nombre": "miguel",
+    "correo": "miguel@example.com",
+    "imagen": "/imagenes/mifoto.png",
+    "clave": "123456"
+  }
+]

@@ -3,20 +3,28 @@ const app = express();
 require('dotenv').config();
 const port = process.env.PORT || 3030;
 
-app.get("/", (req, res) => { 
-res.send('API REST APRENDICES');
-});
-
-//midelware para parsear datos del body
+// Middlewares para parsear el body (van antes de definir cualquier ruta)
 app.use(express.json()); 
-
 app.use(express.urlencoded({ extended: true }));
+
+// Modulos para manejo de archivos
+const sistemaArchivo = require('fs');
+const ruta = require('path');
+const rutaArchivo = ruta.join(__dirname, 'datos.json');
+
+app.get("/", (req, res) => { 
+  res.send('API REST APRENDICES');
+});
 
 //endpoint para  listar de aprendices
 
 app.get("/api/aprendices", (req, res) => {
-  res.status(200).json({
-    "mensaje": "Lista de aprendices:)"
+    sistemaArchivo.readFile(rutaArchivo, 'utf-8', (error, datos) => {
+        if (error) {
+            return res.status(500).json({ mensaje: "Error al leer el archivo" });
+        }
+        const listaAprendices = JSON.parse(datos)     
+        res.status(200).json({"mensaje": listaAprendices})
   })
 })
 
@@ -31,10 +39,27 @@ app.get("/api/aprendices/:id", (req, res) => {
 //endpoint para crear un aprendiz
 
 app.post("/api/aprendices", (req, res) => {
-  res.status(201).json({
-    "mensaje": "Crear aprendices"
-  })
-})
+    const nuevoAprendiz = req.body;
+
+    // Leer archivo y agregar un nuevo aprendiz
+    sistemaArchivo.readFile(rutaArchivo, 'utf-8', (error, datos) => {
+        if (error) {
+            return res.status(500).json({ mensaje: "Error al leer el archivo" });
+        }
+        const listaAprendices = JSON.parse(datos); 
+        
+        // Agregar el nuevo aprendiz al arreglo
+        listaAprendices.push(nuevoAprendiz);
+
+        sistemaArchivo.writeFile(rutaArchivo, JSON.stringify(listaAprendices, null, 2), (error) => {
+            if (error) {
+                return res.status(500).json({ mensaje: "No se puede escribir en el archivo, o BD" });
+            }
+            // Cambiado datosAprendiz por nuevoAprendiz
+            res.status(201).json({ "mensaje": "Aprendiz creado", "datos aprendiz": nuevoAprendiz });
+        });
+    });
+});
 
 //endpoint para actualizar un aprendices
 
