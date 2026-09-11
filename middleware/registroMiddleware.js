@@ -1,5 +1,8 @@
 const registroMiddleware = (req, res, next) => {
-  console.log(`Tiempo milisegundos: ${Date.now()}`);
-  console.log(`Fecha y hora: ${new Date().toISOString()}`);
+  const fecha = new Date().toISOString();
+  console.log(`[historial de peticiones] ${fecha} - ${req.method} ${req.url} ${req.ip}`);
   next();
 };
+
+module.exports = registroMiddleware;
+

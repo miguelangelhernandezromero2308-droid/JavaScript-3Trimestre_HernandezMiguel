@@ -32,5 +32,17 @@
     "correo": "miguel@gmail.com",
     "imagen": "sin imagen",
     "clave": "123456"
+  },
+  {
+    "nombre": "miguelHernandez",
+    "correo": "miguel@gmail.com",
+    "imagen": "sin imagen",
+    "clave": "123456"
+  },
+  {
+    "nombre": "miguelHernandez",
+    "edad": 18,
+    "coreo": "miguel@gmail.com",
+    "imagen": "sin imagen"
   }
 ]
