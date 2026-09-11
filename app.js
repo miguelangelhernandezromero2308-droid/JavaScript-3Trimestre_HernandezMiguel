@@ -7,6 +7,15 @@ const port = process.env.PORT || 3030;
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
 
+//middleware propios
+app.use((req, res, next) => {
+  console.log(`Tiempo milisegundos: ${Date.now()}`);
+  console.log(`Fecha y hora: ${new Date().toISOString()}`);
+  next();
+});
+
+
+
 // Módulos para manejo de archivos
 const sistemaArchivo = require('fs');
 const ruta = require('path');
@@ -103,6 +112,8 @@ app.post("/rutaFormulario", (req, res) => {
   const programa = req.body.programa;
   res.json({ todosDatos: todosDatos, Miprograma: programa });
 });
+
+
 
 app.listen(port, () => { 
   console.log(`SERVIDOR: http://localhost:${port}`);
