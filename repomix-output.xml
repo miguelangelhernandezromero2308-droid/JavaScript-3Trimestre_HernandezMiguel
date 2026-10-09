@@ -40,13 +40,23 @@ The content is organized as follows:
 </file_summary>
 
 <directory_structure>
-middleware/
-  autenticacion.js
-  manejadroErrores.js
-  registroMiddleware.js
 misImagenes/
   1788550843111.png
   imagen.png
+src/
+  controllers/
+    rutaPruebaController.js
+    rutaUsuariosController.js
+    usuariosRouter.js
+  middleware/
+    autenticacion.js
+    manejadroErrores.js
+    registroMiddleware.js
+  routers/
+    index.js
+    pruebaRouter.js
+  app.js
+  server.js
 .env.example
 .gitignore
 app.js
@@ -57,11 +67,38 @@ package.json
 <files>
 This section contains the contents of the repository's files.
 
-<file path="middleware/autenticacion.js">
+<file path="src/controllers/rutaPruebaController.js">
+const mostrarRuta = (req, res) => {
+    res.json({mensaje: "Es mi rutaPrueba y Personal con controller"})
+
+}  
+
+module.exports = mostrarRuta
+</file>
+
+<file path="src/controllers/rutaUsuariosController.js">
+const mostrarRutaUsuarios = async (req, res) => {
+    res.json({ mensaje: "Estos son los usuarios:" })
+}
+
+module.exports = { mostrarRutaUsuarios }
+</file>
+
+<file path="src/controllers/usuariosRouter.js">
+const {Router} = require('express');
+const enrutador = Router();
+const { mostrarUsuarios, crearUsuario } = require('../controllers/usuariosController');
+
+enrutador.get('/listado', mostrarRutaUsuarios);
+
+module.exports = enrutador;
+</file>
+
+<file path="src/middleware/autenticacion.js">
 const jswtoken = require('jsonwebtoken');
 const autenticacion = (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    const token = req.headers['autenticacion'] || req.get('token') || (authHeader && authHeader.split(' ')[1]);
+    const token = req.header['autenticacion'] || req.get('token') || (authHeader && authHeader.split(' ')[1]);
 
     if (!token) {
         return res.status(401).json({ Error: "Acceso denegado, no provee token" }); 
@@ -78,43 +115,104 @@ const autenticacion = (req, res, next) => {
 module.exports = autenticacion;
 </file>
 
-<file path="middleware/manejadroErrores.js">
+<file path="src/middleware/manejadroErrores.js">
 require('dotenv').config();
-
 const manejadorErrores = (error, req, res, next) => {
     const codigoEstado = error.statusCode || 500;
-    const mensaje = error.message || 'Error inesperado !';
-    console.log(`ERROR: ${new Date().toISOString()} ${codigoEstado} - ${mensaje}`); 
-
+    const mensaje = error.message || 'Error inesperado !!';
+    console.error(`[ERROR] - ${new Date().toISOString()}, - ${codigoEstado} - ${mensaje}`);
+    //Validar si hay mas informacion 
     if(error.stack){
-        console.log(error.stack);
+        console.error(error.stack);
     }
+    //respuesta en JSON
     res.json({
-        Error: "ERROR", 
-        codigoEstado, 
-        mensaje,
-        ...(process.env.NODE_ENV === 'development' && {stack: error.stack})
-    });
-};
+        Error : "ERROR", codigoEstado, mensaje,
+        //depenediendo si estamos en desarrollo o produccion
+        ...(process.env.NODE_ENV === "development" && {stack: error.stack})
+    })
+}
 
-module.exports = manejadorErrores;
+module.exports = manejadorErrores
+</file>
+
+<file path="src/middleware/registroMiddleware.js">
+const registroMiddleware = (req, res, next) => {
+    const flecha = new Date();
+    console.log(`[Historial de peticiones] ${flecha}, ${req.method}, ${req.url}, ${req.ip}`);
+    next();
+}
+
+module.exports = registroMiddleware
+</file>
+
+<file path="src/routers/index.js">
+//agrupa las rutas de mi aplicación (usuarios, productos, notas, citas)
+const {Router}= require("express")
+const enrutador = Router()
+const pruebaRouter = require("./pruebaRouter")
+
+enrutador.use("/rutaPrueba", pruebaRouter)
+//ejemplo
+//enrutador.use("/usuarios", usuariosRouter)
+
+module.exports = enrutador;
+</file>
+
+<file path="src/routers/pruebaRouter.js">
+//ruta de solo prueba
+const {Router}= require("express")
+const enrutador = Router()
+const  mostrarRuta  = require("../controllers/rutaPruebaController")
+
+//funcion (req,res) debe ir en el controlador
+enrutador.get("/rutaPersonal", mostrarRuta)
+
+
+module.exports = enrutador
+</file>
+
+<file path="src/app.js">
+require("dotenv").config()
+const express = require('express');
+//importar enrutador
+const enrutador = require('./routers')
+
+const app = express();
+//usar middleware, formatear el body
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+//importar el archivo enrutador (de todas las rutas) de routers
+app.use("/api", enrutador)
+
+
+//endpoint raiz, de bienvenida 
+app.get("/", (req, res) => {
+  res.send('API, REST Estructurado en capas');
+})
+
+module.exports = app
+</file>
+
+<file path="src/server.js">
+//importar mi aplicación
+const app = require('./app');
+
+//verificar el puerto de las variables de entorno
+const PUERTO = process.env.PORT || 3333
+
+//imprimo por consola el link 
+app.listen(PUERTO, () => {
+    console.log(`MI SERVIDOR: http://localhost:${PUERTO}`)
+})
 </file>
 
 <file path=".env.example">
 PUERTO=3030
 NODE_ENV=development
 
-JWJ_SECRET=
-</file>
-
-<file path="middleware/registroMiddleware.js">
-const registroMiddleware = (req, res, next) => {
-  const fecha = new Date().toISOString();
-  console.log(`[historial de peticiones] ${fecha} - ${req.method} ${req.url} ${req.ip}`);
-  next();
-};
-
-module.exports = registroMiddleware;
+JWT_SECRET=
 </file>
 
 <file path=".gitignore">
@@ -341,159 +439,24 @@ dist
 </file>
 
 <file path="app.js">
-const express = require('express');  
-const app = express(); 
-require('dotenv').config();
-const port = process.env.PORT || 3030;
-
-const jwt = require('jsonwebtoken');
-const registroMiddleware = require('./middleware/registroMiddleware');
-const manejadorErrores = require('./middleware/manejadroErrores');
-const autenticacion = require('./middleware/autenticacion');
-
-// Middlewares para parsear el body
-app.use(express.json()); 
-app.use(express.urlencoded({ extended: true }));
-
-// Middleware de registro propio
-app.use((req, res, next) => {
-  console.log(`Tiempo milisegundos: ${Date.now()}`);
-  console.log(`Fecha y hora: ${new Date().toISOString()}`);
-  console.log(`IP del cliente: ${req.ip}`);
-  next();
-});
-app.use(registroMiddleware);
-
-// Módulos para manejo de archivos
-const sistemaArchivo = require('fs');
-const ruta = require('path');
-const rutaArchivo = ruta.join(__dirname, 'datos.json');
-
-const multer = require('multer');
-
-const almacenamiento = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'misImagenes/');   
-  },
-  filename: (req, file, cb) => {
-    const extension = ruta.extname(file.originalname);
-    cb(null, `${Date.now()}${extension}`);
-  }
-});
-
-const cargar = multer({ storage: almacenamiento });
-
-// RUtas
-app.get("/", (req, res) => { 
-  res.send('API REST APRENDICES');
-});
-
-// Endpoint para listar aprendices
-app.get("/api/aprendices", (req, res) => {
-  sistemaArchivo.readFile(rutaArchivo, 'utf-8', (error, datos) => {
-    if (error) {
-      return res.status(500).json({ mensaje: "Error al leer el archivo" });
+const jswtoken = require('jsonwebtoken');
+const autenticacion = (req, res, next) => {
+    //requerir o capturar 
+    const token = req.header("autenticar")?.split(" ")[1]
+    if(!token) {
+        res.status(401).json({mensaje: "Acceso no autorizado, no hay token"})
     }
-    const listaAprendices = JSON.parse(datos);     
-    res.status(200).json({ "mensaje": listaAprendices });
-  });
-});
+    //verificar con nuestra clave o frase secreta
+    jswtoken.verify(token,process.env.JWT_SECRET, (error, usuario) => {
+        if(error){
+            res.status(403).json({Error: "Token invalido"})
+        }
+        req.usuario = usuario;
+        next()
+    })
+}
 
-// Endpoint para listar un aprendiz por ID
-app.get("/api/aprendices/:id", (req, res) => {      
-  res.status(200).json({
-    "mensaje": "Lista de un aprendiz"
-  });
-});  
-
-// Endpoint para crear un aprendiz con imagen
-app.post("/api/aprendices", cargar.single('imagen'), (req, res) => {
-  const nuevoAprendiz = req.body;
-  nuevoAprendiz.imagen = req.file ? `/misImagenes/${req.file.filename}` : "sin imagen";
-
-  sistemaArchivo.readFile(rutaArchivo, 'utf-8', (error, datos) => {
-    if (error) {
-      return res.status(500).json({ mensaje: "Error al leer el archivo" });
-    }
-    const listaAprendices = JSON.parse(datos); 
-    listaAprendices.push(nuevoAprendiz);
-
-    sistemaArchivo.writeFile(rutaArchivo, JSON.stringify(listaAprendices, null, 2), (error) => {
-      if (error) {
-        return res.status(500).json({ mensaje: "No se puede escribir en el archivo, o BD" });
-      }
-      res.status(201).json({ "mensaje": "Aprendiz creado", "datos aprendiz": nuevoAprendiz });
-    });
-  });
-});
-
-// Endpoint para actualizar un aprendiz
-app.put("/api/aprendices/:id", (req, res) => {
-  res.status(200).json({
-    "mensaje": "Actualizar aprendiz"
-  });
-});
-
-// Endpoint para eliminar aprendiz
-app.delete("/api/aprendices/:id", (req, res) => {
-  res.status(200).json({
-    "mensaje": "Eliminar aprendiz"
-  });
-});     
-
-app.get("/Error", (req, res, next) => {
-  next(new Error("Error generado intencionalmente"));
-});
-
-
-
-app.post("/rutaJson", (req, res) => {
-  const todosDatos = req.body;
-  const edad = req.body.edad2;
-  if (edad >= 18) {
-    res.json({ mensaje: "Es mayor de edad" });
-  } else {
-    res.json({ datosJson: todosDatos });
-  }
-});
-
-app.post("/rutaFormulario", (req, res) => {
-  const todosDatos = req.body;
-  const programa = req.body.programa;
-  res.json({ todosDatos: todosDatos, Miprograma: programa });
-});
-
-// Ruta protegida
-app.get("/rutaProtegida", autenticacion, (req, res) => { 
-  res.status(200).json({ mensaje: "Esta es mi ruta protegida !!!" });
-});
-
-//ruta para inicio de secion
-app.post("/api/login", (req, res) => {
-  const UsuarioBD = {
-    "usuario": "miguel",
-    "contrasena": "1234"
-  }
-  const { usuario, clave } = req.body;
-  if (usuario !== UsuarioBD.usuario || clave !== UsuarioBD.contrasena) {
-    return res.status(401).json({ Error: "Usuario o contraseña incorrectos" }); 
-  }
-  const token = jwt.sign(
-    { usuario: usuario },
-    process.env.JWT_SECRET,
-    { expiresIn: '1h' }
-  );
-
-  return res.json({ token: token });
-});
-  
-
-// EL MANEJADOR DE ERRORES SIEMPRE VA AL FINAL DE TODAS LAS RUTAS
-app.use(manejadorErrores);
-
-app.listen(port, () => { 
-  console.log(`SERVIDOR: http://localhost:${port}`);
-});
+module.exports = autenticacion
 </file>
 
 </files>
