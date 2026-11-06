@@ -1,7 +1,7 @@
 const registroMiddleware = (req, res, next) => {
-    const flecha = new Date();
-    console.log(`[Historial de peticiones] ${flecha}, ${req.method}, ${req.url}, ${req.ip}`);
-    next();
+    const fecha = new Date().toISOString();
+    console.log(`[Historial de peticiones] ${fecha}, ${req.method} ${req.url}, ${req.ip}`);
+    next()
 }
 
 module.exports = registroMiddleware

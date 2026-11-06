@@ -1,25 +1,22 @@
-require("dotenv").config();
-const express = require('express');
-const enrutador = require('./routers');
-const registroMiddleware = require('./middleware/registroMiddleware');
-const manejadorErrores = require('./middleware/manejadroErrores');
+require("dotenv").config()
+const express = require("express")
+//importar enrutador
+const enrutador = require("./routers")
 
-const app = express();
+const app = express()
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+//usar middleware, formatear el body
+app.use(express.json())
+app.use(express.urlencoded({extended: true}))
 
-// Registra en consola cada petición que llega
-app.use(registroMiddleware);
 
-// Rutas principales
-app.use("/api", enrutador);
+//importar el archivo enrutador(toda las rutas) de routers
+app.use("/api", enrutador)
 
-app.get("/", (req, res) => {
-  res.send('API REST funcionando correctamente');
-});
+//endpoint raiz, de Bienvenida
+app.get("/",(req, res)=>{
+    res.send("API, REST Estructurado en capas")
+})
 
-// Siempre al final para atrapar cualquier error
-app.use(manejadorErrores);
 
-module.exports = app;
+module.exports = app

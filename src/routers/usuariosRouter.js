@@ -1,11 +1,16 @@
-const { Router } = require('express');
-const enrutador = Router();
-// Importamos el controlador correcto
-const { mostrarRutaUsuarios, registrarController, loginController } = require('../controllers/rutaUsuariosController');
+//ruta de usuarios
+const {Router}= require ("express")
+const enrutador = Router() 
+const {mostrarRutaUsuarios, mostrarUsuarioPorId,crearUsuarioController,actualizarUsuarioController,eliminarUsuarioController,registrarController, loginController} = require("../controllers/rutaUsuariosController")
 
-enrutador.get('/listado', mostrarRutaUsuarios);
-enrutador.post("/registrar", registrarController);
-enrutador.post("/login", loginController);
+//FUNCION (req,res) dbeer ir en el controlador
+enrutador.get("/listado",mostrarRutaUsuarios)
+enrutador.get("/listado/:id", mostrarUsuarioPorId)
+enrutador.post("/crearUser", crearUsuarioController)
+enrutador.put("/actualizar/:id", actualizarUsuarioController)
+enrutador.delete("/eliminar/:id", eliminarUsuarioController)
+enrutador.post("/registrar",registrarController)
+enrutador.post("/login", loginController)
+//FUNCION (req,res) dbeer ir en el controlador
 
-
-module.exports = enrutador;
+module.exports = enrutador
